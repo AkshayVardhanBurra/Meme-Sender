@@ -29,7 +29,7 @@ def saveContacts(contacts, contactFile=CONTACTS_FILE):
     
     with open(contactFile, "w") as file:
         for contact in contacts:
-            file.write(str(contact) + "\n")
+            file.write(str(contact).strip() + "\n")
         
 
 def printAllContacts(contacts):
@@ -38,10 +38,7 @@ def printAllContacts(contacts):
         print(f"{i} : {contacts[i - 1]}")
 
 
-getAllContacts(contacts, CONTACTS_FILE)
-printAllContacts(contacts)
-saveContacts(contacts)
-
+getAllContacts(contacts)
 
 
 
