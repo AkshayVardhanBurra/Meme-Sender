@@ -1,3 +1,4 @@
 john|323290320932|True|True|dearakhi@gmail.com|0|+1
 john|233232|True|True|akshayvardhanburra@gmail.com|0|+1
-JOhn|3232332323|False|True|akshayvardhanburra@gmail.com|0|+1
+JOhn|3232332323|True|True|akshayvardhanburra@gmail.com|0|+1
+dharsan|23932903029|True|True|yeetusgalactus4@gmail.com|0|+1

@@ -1,6 +1,5 @@
 from main import getAllContacts
 from contact import *
-from concurrent.futures import ThreadPoolExecutor
 import time
 import requests
 import random
@@ -9,25 +8,29 @@ import sys
 import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 smtp_server = "smtp.gmail.com"
 port = 587  # For starttls
 sender_email = "burraakshay5@gmail.com"
-password = "bckn hxtc frpn lrjh"
+
+password = str(os.getenv("password"))
 
 context = ssl.create_default_context()
 
 
 INTERVAL = 0.5
 
-HUMOR_API_KEY = "26ad20b26a024bb0b0d45fdbce9d03d4"
+HUMOR_API_KEY = os.getenv("HUMOR_API_KEY")
 
-giphy_api_key = "TLTMWF0FhXitJrVmFJV5J3rDR2guU0ES"
+giphy_api_key = os.getenv("giphy_api_key")
 
-ACCOUNT_SID = "AC3057811b7ba3ebdf93c2a82e2bb07fef"
+ACCOUNT_SID = os.getenv("ACCOUNT_SID")
 
-AUTH_TOKEN = "1b3e62442618a903503c1c2b88a7e6e9"
+AUTH_TOKEN = os.getenv("AUTH_TOKEN") # Need to change
 
 MAX_LENGTH = 70
 
