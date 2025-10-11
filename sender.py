@@ -10,7 +10,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 from dotenv import load_dotenv
-
+import threading
 load_dotenv()
 
 smtp_server = "smtp.gmail.com"
@@ -22,7 +22,7 @@ password = str(os.getenv("password"))
 context = ssl.create_default_context()
 
 
-INTERVAL = 0.5
+INTERVAL = 0.2
 
 HUMOR_API_KEY = os.getenv("HUMOR_API_KEY")
 
@@ -41,20 +41,28 @@ contacts = []
 getAllContacts(contacts)
 client = Client(ACCOUNT_SID, AUTH_TOKEN)
 
-try:
-    server = smtplib.SMTP(smtp_server,port)
-    server.ehlo() # Can be omitted
-    server.starttls(context=context) # Secure the connection
-    server.ehlo() # Can be omitted
-    server.login(sender_email, password)
-except:
-     print("[-] Cannot connect to email system!")
-     sys.exit()
+THREAD_POOL_LIMIT = 4
+servers = []
+
+
+def createServers(servers, limit=THREAD_POOL_LIMIT):
+     
+    try:
+        for i in range(limit):
+            server = smtplib.SMTP(smtp_server,port)
+            server.ehlo() # Can be omitted
+            server.starttls(context=context) # Secure the connection
+            server.ehlo() # Can be omitted
+            server.login(sender_email, password)
+            servers.append(server)
+    except:
+        print("[-] Cannot connect to email system!")
+        sys.exit()
 
 
 
-
-
+createServers(servers, THREAD_POOL_LIMIT)
+print("NUMBER OF SERVERS: " + str(len(servers)))
 
 #sends the meme to a contact. this task will go in the threadpool
 def sendSMS(contact:Contact, meme, type):
@@ -79,13 +87,11 @@ def sendSMS(contact:Contact, meme, type):
 
 
 
-def send_email(img_meme, contact:Contact):
+def send_email(img_meme, server, contact:Contact):
      
      random_meme = img_meme["data"][random.randint(0, len(img_meme["data"]) - 1)]
-     print("trying to send: ")
-     print("URL: " + str(random_meme))
      email_body = construct_email_message(random_meme, contact)
-     print(email_body.as_string())
+     print("SENT EMAIL TO: " + contact.mail)
 
      server.sendmail(sender_email, contact.mail, email_body.as_string())
     
@@ -128,7 +134,7 @@ def construct_email_message(meme, contact:Contact):
 
 
 
-def send_meme(meme_img, meme_text, contact:Contact):
+def send_meme(meme_img, meme_text, server, contact:Contact):
      print("sending meme to: " + contact.name + " sms status: " + str(contact.hasSMS))
 
     # uncomment when twilio is back up
@@ -139,10 +145,12 @@ def send_meme(meme_img, meme_text, contact:Contact):
      
      if(contact.mail.strip() != ""):
         try:
-            send_email(meme_img, contact)
+            send_email(meme_img, server, contact)
         except Exception as e:
-             print("[-] couldn't send email!")
-             print(e)
+             print("++++++++++++++++++")
+             print("[-] couldn't send email to: !" + str(contact))
+             print(str(e) + "[-]")
+             print("+++++++++++++++++++")
 
      #Send the meme email
 
@@ -170,11 +178,17 @@ def get_meme(type="memes"):
 
 
 # with ThreadPoolExecutor(max_workers=4) as pool:
+def wait_for_threads(thread_pool):
+    while len(thread_pool) > 0:
+         thr = thread_pool.pop(0)
+         thr.join()
+
 
 while(True):
 
         try:
-        
+            
+            thread_pool = []
             meme_img = get_meme("memes")
 #             meme_img={
 #     "memes": [
@@ -201,13 +215,27 @@ while(True):
 # }
             # meme_text = get_meme("jokes")
             meme_text = "examplejoke"
-
+            server_index = 0
             for contact in contacts:
                 
-                send_meme(meme_img, meme_text, contact)
+                
+                
+                print("starting on server index: " + str(server_index))
+                worker_thread = threading.Thread(target=send_meme, args=(meme_img, meme_text, servers[server_index], contact))
+                thread_pool.append(worker_thread)
+                worker_thread.start()
+                server_index += 1
 
-
+                if(len(thread_pool) >= THREAD_POOL_LIMIT):
+                     wait_for_threads(thread_pool)
+                     server_index = 0
+                     thread_pool = []
+            
+            wait_for_threads(thread_pool)
+            server_index = 0
+            thread_pool = []
             time.sleep(INTERVAL * 60)
+            
         except ValueError:
             print("Damn the api key ran out!")
             break
