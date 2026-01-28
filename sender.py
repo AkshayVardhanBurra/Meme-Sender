@@ -218,19 +218,3 @@ while(True):
 
 
 
-
-
-
-
-
-        
-    
-        
-
-
-
-
-
-
-#outputs a url that gets categories from
-
