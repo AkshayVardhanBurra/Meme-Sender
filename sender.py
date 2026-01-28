@@ -190,30 +190,6 @@ while(True):
             
             thread_pool = []
             meme_img = get_meme("memes")
-#             meme_img={
-#     "memes": [
-#         {
-#             "id": 6696,
-#             "url": "https://i.imgur.com/1rmAxUG.jpg",
-#             "type": "image/jpeg",
-#             "description":"yes"
-#         },
-#         {
-#             "id": 6697,
-#             "url": "https://i.imgur.com/ELT8zMQ.jpg",
-#             "type": "image/jpeg",
-#             "description":"yes"
-#         },
-#         {
-#             "id": 6698,
-#             "url": "https://i.imgur.com/8JTc5z3.jpg",
-#             "type": "image/jpeg",
-#             "description":"yes"
-#         }
-#     ],
-#     "available": 32
-# }
-            # meme_text = get_meme("jokes")
             meme_text = "examplejoke"
             server_index = 0
             for contact in contacts:
@@ -237,11 +213,9 @@ while(True):
             time.sleep(INTERVAL * 60)
             
         except ValueError:
-            print("Damn the api key ran out!")
+            print("api key ran out!")
             break
 
-        
-print("ending program lil bro")
 
 
 
